@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="תחקיר טיסה יומי. רושמים את הטיסה, היעדים עוברים לטיסה הבאה.">
+<title>תחקיר</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="תחקיר">
+<meta name="theme-color" content="#0A1628" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3F6FB" media="(prefers-color-scheme: light)">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Loaded without blocking the first paint. As a plain stylesheet in <head>
+     this held up every script on the page until it resolved, so on a weak
+     signal the app sat blank waiting on a font it can live without: the CSS
+     falls back to the system Hebrew face, and the service worker serves these
+     from cache on every launch after the first. -->
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Rubik:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Rubik:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/features.css">
+</head>
+<body>
+
+<div id="authGate" class="lock gate" hidden>
+  <div class="lock__inner">
+    <div class="lock__mark" aria-hidden="true"></div>
+    <h1 class="lock__title">תחקיר</h1>
+    <p class="gate__body" id="gateBody"></p>
+    <div class="gate__acts" id="gateActs"></div>
+    <p class="gate__note" id="gateNote"></p>
+  </div>
+</div>
+
+<!-- Which stage of the course. Its own element rather than a second use of
+     #authGate: they are different screens, one is about who you are and the
+     other about what you fly, and sharing a node makes "is the gate up?"
+     unanswerable for anything looking at the DOM. -->
+<div id="coursePicker" class="lock gate" hidden>
+  <div class="lock__inner">
+    <div class="lock__mark" aria-hidden="true"></div>
+    <h1 class="lock__title">תחקיר</h1>
+    <p class="gate__body" id="courseBody"></p>
+    <div class="gate__acts" id="courseActs"></div>
+    <p class="gate__note" id="courseNote"></p>
+  </div>
+</div>
+
+<div id="lockScreen" class="lock" hidden>
+  <div class="lock__inner">
+    <div class="lock__mark" aria-hidden="true"></div>
+    <h1 class="lock__title">תחקיר</h1>
+    <p class="lock__hint" id="lockHint"></p>
+    <div class="pin" id="pinDots" role="status" aria-live="polite"></div>
+    <div class="keypad" id="keypad"></div>
+  </div>
+</div>
+
+<div id="app" class="app" hidden>
+  <a class="skip-link" href="#view" id="skipContent"></a>
+  <header class="topbar" id="topbar"></header>
+  <main class="view" id="view" tabindex="-1"></main>
+  <nav class="tabbar" id="tabbar" aria-label="ניווט ראשי"></nav>
+</div>
+
+<div class="toaster" id="toaster" role="status" aria-live="polite"></div>
+<dialog class="sheet" id="sheet"></dialog>
+
+<script src="js/strings.js"></script>
+<script src="js/auth-config.js"></script>
+<script src="js/auth.js"></script>
+<!-- courses before store: the category vocabulary and the spelling aliases are
+     read off the active course. syllabus before its data files, which register
+     themselves into it. -->
+<script src="js/courses.js"></script>
+<script src="js/syllabus.js"></script>
+<script src="js/syllabus-data.js"></script>
+<script src="js/syllabus-mitkadem.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/visuals.js"></script>
+<script src="js/motion.js"></script>
+<script src="js/tour.js"></script>
+<script src="js/store.js"></script>
+<script src="js/workspace.js"></script>
+<script src="js/feedback-config.js"></script>
+<script src="js/features.js"></script>
+<script src="js/summary.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
