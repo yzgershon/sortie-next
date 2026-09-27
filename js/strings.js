@@ -450,6 +450,16 @@
     myProfile: 'הפרופיל שלי',
     trailLabel: function (counts) { return 'טיסות מתוחקרות בכל אחד משמונת השבועות האחרונים, מהישן לחדש: ' + counts.join(', '); },
 
+    /* the course's end date */
+    courseEnds: 'סיום הקורס',
+    courseEndsOn: function (d) { return 'סיום הקורס ' + d; },
+    daysLeftN: function (n) { return n === 1 ? 'עוד יום אחד' : 'עוד ' + n + ' ימים'; },
+    daysLeftLabel: function (n) { return n === 1 ? 'יום לסיום הקורס' : 'ימים לסיום הקורס'; },
+    courseLastDay: 'היום הוא היום האחרון בקורס', courseEnded: function (d) { return 'הקורס הסתיים ב־' + d; },
+    sortiesUndocumented: function (n) { return n === 1 ? 'גיחה אחת בסילבוס עוד לא תועדה' : n + ' גיחות בסילבוס עוד לא תועדו'; },
+    paceToFinish: function (n) { return 'כדי שכל הסילבוס יתועד עד הסיום: כ־' + n + ' ' + (n === 1 ? 'גיחה' : 'גיחות') + ' בשבוע'; },
+    allDocumented: 'כל הגיחות בסילבוס תועדו',
+
     /* flight hours in settings */
     hoursTitle: 'שעות טיסה', hoursLogged: 'מתועדות ביומן', hoursManual: 'תוספת ידנית', hoursTotal: 'סך השעות שלך',
     hoursInput: 'סך שעות הטיסה שלך', hoursInputHint: 'למשל 32.5 או 32:30',

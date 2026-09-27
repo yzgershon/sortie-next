@@ -137,6 +137,7 @@
   function progress(route, ui) {
     ui.topbar({ title: T.courseProgress, back: true, backTo: '' });
     var p = ui.progress(), course = Store.course(), pct = Math.round(p.done / Math.max(1, p.total) * 100);
+    var clock = ui.clock ? ui.clock(p) : null;
     var milestones = Workspace.all().milestones.filter(function (m) { return !m.deletedAt && m.course === course.id; }).sort(function (a, b) { return (a.date || '9999').localeCompare(b.date || '9999'); });
     var unknown = Store.done().filter(function (r) { return !r.course; }).length;
     var checkpoints = [];
@@ -146,7 +147,7 @@
       if (!checkpoints.some(function (item) { return item.kind === kind; })) checkpoints.push({ kind: kind, entry: entry });
     });
     var pilot = Store.settings().pilotProfile || {};
-    ui.view.innerHTML = '<div class="journey stack-6"><header class="journey__hero"><div class="journey__eyebrow">' + icon('flag') + '<span>' + esc(course.label) + '</span>' + (pilot.name || pilot.callsign ? '<b dir="auto">' + esc(pilot.callsign || pilot.name) + '</b>' : '') + '</div>' +
+    ui.view.innerHTML = '<div class="journey stack-6"><header class="journey__hero"><div class="journey__eyebrow"><span class="journey__badge" aria-hidden="true"><img class="badge" src="assets/badge.png" alt="" width="160" height="160" decoding="async"></span><span>' + esc(course.label) + '</span>' + (pilot.name || pilot.callsign ? '<b dir="auto">' + esc(pilot.callsign || pilot.name) + '</b>' : '') + '</div>' +
       '<h1>' + esc(T.courseProgress) + '</h1><p>' + esc(T.progressSub) + '</p>' +
       /* The course as a flight plan: each section a numbered waypoint, legs as
          long as the sorties they hold, lit as far as the recorded coverage. */
@@ -156,6 +157,14 @@
         shipKind: 'f16', shipSize: 22, label: T.courseRouteLabel(pct, p.next ? p.next.section || p.next.name : '') }) +
       '<figcaption>' + esc(T.courseRouteHint) + '</figcaption></figure>' +
       '<div class="journey__numbers"><div><b>' + p.done + '</b><span>' + esc(T.progressCompleted) + '</span></div><div><b>' + (p.total - p.done) + '</b><span>' + esc(T.progressRemaining) + '</span></div></div>' +
+      /* the end of the course, when it is known: how long is left, and what
+         documenting the rest of the syllabus would take each week */
+      (clock ? '<div class="course-clock" data-courseclock="' + clock.days + '"><div class="course-clock__k">' + icon('calendar') + '<span>' + esc(T.courseEnds) + '</span><b>' + esc(clock.full) + '</b></div>' +
+        (clock.days > 0
+          ? '<div class="course-clock__v"><strong dir="ltr">' + clock.days + '</strong><span>' + esc(T.daysLeftLabel(clock.days)) + '</span></div>'
+          : '<p class="course-clock__v course-clock__v--end">' + esc(clock.days === 0 ? T.courseLastDay : T.courseEnded(clock.date)) + '</p>') +
+        (clock.days >= 0 ? '<p class="course-clock__s">' + esc(clock.left ? T.sortiesUndocumented(clock.left) + (clock.pace ? '. ' + T.paceToFinish(clock.pace) + '.' : '') : T.allDocumented) + '</p>' : '') +
+        '</div>' : '') +
       button(T.shareProgress, 'data-shareprogress', 'share', 'btn--lit btn--block') + '<p class="field__hint">' + esc(T.progressBasis) + '</p>' +
       (unknown ? '<p class="field__hint">' + esc(T.progressUnknown(unknown)) + '</p>' : '') + '</header>' +
       '<section><div class="section-heading"><h2>' + esc(T.milestones) + '</h2>' + button(T.milestoneAdd, 'data-addmilestone', 'plus') + '</div><div class="milestones">' +
@@ -197,6 +206,10 @@
     c.strokeStyle = color('--rule-2'); c.lineWidth = 2; c.strokeRect(40, 40, 1000, 1270);
     // the flag's two blue stripes, as thin rules inside the frame
     c.fillStyle = color('--iaf'); c.fillRect(40, 66, 1000, 5); c.fillRect(40, 1279, 1000, 5);
+    try {
+      var badge = new Image(); badge.src = 'assets/badge.png'; await badge.decode();
+      c.save(); c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 18; c.shadowOffsetY = 6; c.drawImage(badge, 96, 92, 104, 104); c.restore();
+    } catch (e) {}   // the card is complete without it
     c.direction = 'rtl'; c.textAlign = 'right'; c.fillStyle = color('--cyan'); c.font = '500 32px Heebo, Arial'; c.fillText(T.app, 976, 132);
     c.fillStyle = color('--fg'); c.font = '700 64px Heebo, Arial'; c.fillText(T.courseProgress, 976, 236);
     c.fillStyle = color('--fg-mid'); c.font = '400 36px Heebo, Arial'; c.fillText(course.label, 976, 296);

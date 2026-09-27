@@ -278,10 +278,10 @@ body.is-scrolled .topbar { border-bottom-color: var(--rule); box-shadow: 0 10px 
 }
 .topbar--root .topbar__title { padding-inline-start: 4px; font-size: var(--t-20); }
 /* the mark on a small blue-violet tile, the way NexBank carries its logo */
-.topbar__mark { display: grid; place-items: center; width: 36px; height: 36px; margin-inline-start: 6px; flex: none;
-  border-radius: 11px; background: var(--card-grad); color: var(--card-fg); box-shadow: var(--lit-glow); }
-.topbar__mark svg { width: 24px; height: 24px; }
-.topbar__mark .mark__star { fill: rgba(255,255,255,.2); stroke: currentColor; }
+/* the course badge, as the mark of every main screen */
+.badge { display: block; width: 100%; height: 100%; object-fit: contain; }
+.topbar__mark { display: grid; place-items: center; width: 38px; height: 38px; margin-inline-start: 4px; flex: none; border-radius: 50%;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fg) 10%, transparent), 0 6px 18px -6px rgba(176,45,37,.6); }
 .mark { display: block; width: 100%; height: 100%; overflow: visible; }
 .mark__ring { fill: none; stroke: currentColor; stroke-width: 1.3; }
 .mark__star { fill: var(--iaf-dim); stroke: var(--iaf); stroke-width: 1.5; stroke-linejoin: round; }
@@ -534,8 +534,7 @@ input[type="date"].input { min-width: 0; }
 .pilot-avatar { position: relative; flex: none; display: grid; place-items: center; width: 54px; height: 54px; margin: 6px;
   border-radius: 50%; background: var(--card-grad); color: var(--card-fg); box-shadow: var(--card-shadow); }
 .pilot-avatar__i { font: 700 1.375rem/1 var(--font-display); }
-.pilot-avatar__mark { width: 30px; height: 30px; }
-.pilot-avatar .mark__star { fill: rgba(255,255,255,.2); stroke: currentColor; }
+.pilot-avatar__badge { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; }
 .pilot-avatar__ring { position: absolute; inset: -6px; border-radius: 50%; border: 1.5px dashed var(--cyan-line); animation: spin 16s linear infinite; }
 .pilot-avatar__ring::after { content: ""; position: absolute; top: -3.5px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
   border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
@@ -598,7 +597,10 @@ input[type="date"].input { min-width: 0; }
 .flightcard__course { position: relative; display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 4px; padding: 8px 12px;
   border-radius: 14px; background: rgba(6,14,32,.24); border: 1px solid rgba(255,255,255,.16); color: var(--card-fg); }
 [data-theme="calm"] .flightcard__course { background: var(--face); border-color: var(--rule); }
-.flightcard__ck { font-size: var(--t-12); font-weight: 600; white-space: nowrap; }
+.flightcard__ck { font-size: var(--t-12); font-weight: 600; white-space: nowrap; display: grid; gap: 1px; }
+.flightcard__ck small { font-size: var(--t-10); font-weight: 600; color: var(--card-mid); }
+.course-clock__line { display: flex; align-items: center; gap: 6px; }
+.course-clock__line svg { width: 14px; height: 14px; flex: none; color: var(--cyan); }
 .flightcard__bar { flex: 1; min-width: 36px; height: 6px; border-radius: var(--r-full); background: rgba(255,255,255,.18); overflow: hidden; }
 .flightcard__bar i { display: block; height: 100%; width: var(--p); border-radius: inherit; background: currentColor; box-shadow: 0 0 10px rgba(255,255,255,.8); }
 .flightcard__course strong { font: 700 var(--t-17)/1 var(--font-mono); }
@@ -1221,9 +1223,10 @@ body[data-route="brief"] .toaster, body[data-route="debrief"] .toaster, body[dat
   background: radial-gradient(90% 50% at 90% 0%, var(--glow-a), transparent 70%), radial-gradient(80% 45% at 0% 100%, var(--glow-b), transparent 70%), var(--bg);
   padding: calc(var(--s-6) + env(safe-area-inset-top)) var(--gutter) calc(var(--s-8) + env(safe-area-inset-bottom)); }
 .lock__inner { display: grid; justify-items: center; gap: var(--s-2); width: 100%; max-width: 320px; }
-.lock__mark { width: 76px; height: 76px; padding: 14px; border-radius: 24px; color: var(--card-fg); background: var(--card-grad);
-  box-shadow: var(--card-shadow), 0 0 60px var(--glow-a); }
-.lock__mark .mark__star { fill: rgba(255,255,255,.2); stroke: currentColor; }
+.lock__mark { width: 112px; height: 112px; padding: 0; border-radius: 50%; background: none;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--fg) 7%, transparent), 0 0 70px var(--glow-a), 0 20px 44px -14px rgba(176,45,37,.55);
+  animation: badgeIn .9s var(--e-spring) both; }
+@keyframes badgeIn { from { opacity: 0; transform: scale(.6) rotate(-12deg); } }
 .lock__inner { position: relative; z-index: 1; }
 /* the flag's stripes across the top and bottom of the screen */
 .lock::before, .lock::after { content: ""; position: fixed; inset-inline: 0; height: 12px; border-block: 2px solid var(--iaf); opacity: .45; pointer-events: none; }
@@ -1343,13 +1346,12 @@ body[data-route="brief"] .toaster, body[data-route="debrief"] .toaster, body[dat
   background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
   background-size: 20px 20px; -webkit-mask-image: radial-gradient(100% 100% at 100% 0%, #000, transparent 70%); mask-image: radial-gradient(100% 100% at 100% 0%, #000, transparent 70%); }
 .release-hero__art { position: absolute; inset: 20px 6px auto; z-index: -1; color: var(--card-fg); opacity: .9; }
-.release-hero__mark { position: absolute; top: 14px; inset-inline-start: 16px; width: 40px; height: 40px; padding: 7px; border-radius: 13px;
-  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); color: #fff; }
-.release-hero__mark .mark__star { fill: rgba(255,255,255,.2); stroke: currentColor; }
+.release-hero__mark { position: absolute; top: 12px; inset-inline-start: 14px; width: 54px; height: 54px; border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.22), 0 8px 20px -6px rgba(0,0,0,.45); }
 .release-hero__kicker { font: 700 var(--t-12) var(--font-display); letter-spacing: .02em; }
 .release-hero__ver { margin-inline-start: auto; padding: 4px 11px; border-radius: 999px; font-size: var(--t-11); font-weight: 700;
   background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); }
-[data-theme="calm"] .release-hero__mark, [data-theme="calm"] .release-hero__ver { background: var(--face-2); border-color: var(--rule-2); color: var(--fg); }
+[data-theme="calm"] .release-hero__ver { background: var(--face-2); border-color: var(--rule-2); color: var(--fg); }
 .sheet__panel--release .sheet__title { font-size: var(--t-24); letter-spacing: -.02em; }
 .release-points { display: grid; gap: 4px; margin: 2px 0 12px; }
 .release-points li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 2px; }

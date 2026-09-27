@@ -15,6 +15,9 @@
     {
       id: 'rishoni',
       label: 'ראשוני',
+      /* The course's last day, YYYY-MM-DD. Shown with a countdown wherever
+         progress is; null leaves the date out rather than guessing it. */
+      ends: '2026-12-10',
       /* Categories are matched as key phrases inside נושא טיסה, so "AW 3"
          files under AW and the number is ignored. */
       categories: ['AW', 'ניווט', 'הקפות', 'מבנה', 'גנ״מ', 'מ״מ', 'משולבת',
@@ -25,6 +28,7 @@
     {
       id: 'mitkadem',
       label: 'מתקדם',
+      ends: null,   // not announced yet; set it here when it is
       /* The seventeen series of the מתקדם chart, kept separate rather than
          folded together: א and ב of a series are flown differently, and
          collapsing them would merge two sets of goals that should not mix. */
@@ -66,6 +70,15 @@
     resolve: function (id) { return get(id) || get(DEFAULT); },
     defaultId: DEFAULT,
     ids: function () { return COURSES.map(function (c) { return c.id; }); },
-    label: function (id) { var c = get(id); return c ? c.label : ''; }
+    label: function (id) { var c = get(id); return c ? c.label : ''; },
+    /** Whole days from `today` (YYYY-MM-DD) to the course's last day: 0 on the
+     *  day itself, negative after it, null when no end date is known. Counted
+     *  on calendar dates, so a clock change never shifts it by a day. */
+    daysLeft: function (id, today) {
+      var c = get(id);
+      if (!c || !c.ends || !/^\d{4}-\d{2}-\d{2}$/.test(String(today))) return null;
+      function day(iso) { return Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); }
+      return Math.round((day(c.ends) - day(today)) / 86400000);
+    }
   };
 })(window);

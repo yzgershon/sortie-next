@@ -1,5 +1,5 @@
 /* Verified network-first shell. A partial release never replaces a working cache. */
-var VERSION = 'sortie-v23-canary';
+var VERSION = 'sortie-v23-canary2';
 var SHELL = VERSION + '-shell';
 var FONTS = 'sortie-fonts';
 var manifestPromise;
@@ -44,10 +44,10 @@ self.addEventListener('activate', function (event) {
   event.waitUntil((async function () {
     await manifest();
     var keys = await caches.keys();
-    var owned = keys.filter(function (key) { return /^sortie-v[0-9].*-shell$/.test(key) && key !== SHELL; });
+    var owned = keys.filter(function (key) { return /^sortie-v23-canary.*-shell$/.test(key) && key !== SHELL; });
     var previous = owned[owned.length - 1];
     await Promise.all(keys.filter(function (key) {
-      return /^sortie-v[0-9].*-(shell|assets)$/.test(key) && key !== SHELL && key !== previous;
+      return /^sortie-v23-canary.*-(shell|assets)$/.test(key) && key !== SHELL && key !== previous;
     }).map(function (key) { return caches.delete(key); }));
     await self.clients.claim();
   })());

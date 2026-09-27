@@ -6,7 +6,7 @@
 (function (global) {
   'use strict';
 
-  var BUILD = 'v23-canary';   // keep in step with VERSION in sw.js
+  var BUILD = 'v23-canary2';   // keep in step with VERSION in sw.js
 
   var appEl, viewEl, topbarEl, tabbarEl, toasterEl, sheetEl, lockEl;
   var route = { name: 'home', param: null };
@@ -48,6 +48,9 @@
       return '<span class="odo__d" style="--d:' + c + ';--k:' + (n - k) + '">' + c + '</span>';
     }).join('') + '</span>';
   }
+  /* The course badge, supplied by Yish: decorative wherever it appears, since
+     the app's name always stands beside it. */
+  var BADGE = '<img class="badge" src="assets/badge.png" alt="" width="160" height="160" decoding="async">';
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   function reportActionError(e) {
@@ -299,7 +302,7 @@
     topbarEl.classList.toggle('topbar--root', root);
     topbarEl.innerHTML =
       (c.back ? '<button class="iconbtn iconbtn--flip" data-back aria-label="' + esc(T.back) + '">' + icon('chevLeft') + '</button>' : '') +
-      (root ? '<span class="topbar__mark" aria-hidden="true">' + Visuals.mark() + '</span>' : '') +
+      (root ? '<span class="topbar__mark" aria-hidden="true">' + BADGE + '</span>' : '') +
       '<div class="topbar__title">' + esc(c.title || '') + '</div>' +
       /* A brief is often written next to notes from the last flight. The tab
          bar is hidden on forms, so the notebook stays one tap away there. */
@@ -331,7 +334,7 @@
        summary: screenSummary, syllabus: screenSyllabus };
     if (screens[route.name]) screens[route.name]();
     else Features.render(route, { view: viewEl, topbar: renderTopbar, toast: toast, sheet: openSheet, confirm: confirmSheet,
-      go: go, build: BUILD, progress: syllabusProgress, saveFile: saveFile, tour: startTour, setFlush: function (fn) { formFlush = fn; } });
+      go: go, build: BUILD, progress: syllabusProgress, clock: courseClock, saveFile: saveFile, tour: startTour, setFlush: function (fn) { formFlush = fn; } });
     var notebookEditor = route.name === 'notebook' && !!viewEl.querySelector('.notebook--editor');
     viewEl.classList.toggle('view--notebookEditor', notebookEditor);
     if (notebookEditor) tabbarEl.hidden = true;
@@ -363,7 +366,7 @@
       hero: '<div class="release-hero">' +
           '<div class="release-hero__art" aria-hidden="true">' +
             Visuals.contrail({ values: [1, 2, 1, 3, 2, 3, 4, 5], w: 320, h: 70, animate: !(global.Motion && Motion.reduced()) }) + '</div>' +
-          '<span class="release-hero__mark" aria-hidden="true">' + Visuals.mark() + '</span>' +
+          '<span class="release-hero__mark" aria-hidden="true">' + BADGE + '</span>' +
           '<span class="release-hero__kicker">' + esc(T.releaseKicker) + '</span>' +
           '<span class="release-hero__ver mono">' + esc(T.releaseVersion(BUILD)) + '</span></div>',
       body: '<ul class="release-points">' + T.releaseHighlights.map(function (x) {
@@ -448,6 +451,7 @@
     var week = all.filter(inThisWeek).length;
 
     var progress = syllabusProgress(), percentage = progress ? Math.round(progress.done / Math.max(1, progress.total) * 100) : 0;
+    var clock = progress ? courseClock(progress) : null;
 
     /* Debriefed flights in each of the last eight weeks, the same windows as
        מגמות, drawn on the card as a contrail. */
@@ -478,7 +482,8 @@
             : '<span dir="ltr">' + mins + '</span> ' + esc(T.minutesShort)) + '</span></div>' +
         '<div class="flightcard__trail">' + Visuals.contrail({ values: trail, w: 320, h: 58, animate: live, label: T.trailLabel(trail) }) + '</div>' +
         (progress
-          ? '<a class="flightcard__course" href="#/progress"><span class="flightcard__ck">' + esc(T.courseProgress) + '</span>' +
+          ? '<a class="flightcard__course" href="#/progress"><span class="flightcard__ck">' + esc(T.courseProgress) +
+              (clock ? '<small data-courseclock="' + clock.days + '">' + esc(clockLine(clock)) + '</small>' : '') + '</span>' +
               '<span class="flightcard__bar" aria-hidden="true"><i style="--p:' + percentage + '%"></i></span>' +
               '<strong dir="ltr">' + percentage + '<small>%</small></strong>' + icon('chevLeft') + '</a>'
           : '') +
@@ -528,7 +533,7 @@
           (pilot.callsign ? '<b dir="auto">' + esc(pilot.callsign) + '</b>' : '') + '</div></div>' +
         '<a class="pilot-avatar" href="#/profile" aria-label="' + esc(T.myProfile) + '">' +
           '<span class="pilot-avatar__ring" aria-hidden="true"></span>' +
-          (initial ? '<span class="pilot-avatar__i" aria-hidden="true">' + esc(initial) + '</span>' : Visuals.mark('mark pilot-avatar__mark')) +
+          (initial ? '<span class="pilot-avatar__i" aria-hidden="true">' + esc(initial) + '</span>' : '<span class="pilot-avatar__badge" aria-hidden="true">' + BADGE + '</span>') +
         '</a>' +
       '</div>' +
       (shown('focus')
@@ -2472,6 +2477,25 @@
     return { sections: sections, done: doneN, total: SyllabusRef.count(), next: next, flown: flownNames };
   }
 
+  /* The current course's end date as a countdown, with what is still to be
+     documented and the weekly pace that would cover it. null when the course
+     has no announced end date, so nothing is shown rather than a guess. */
+  function courseClock(p) {
+    var c = Store.course(), days = global.Courses && c ? Courses.daysLeft(c.id, Store.todayISO()) : null;
+    if (days === null) return null;
+    var left = p ? Math.max(0, p.total - p.done) : 0;
+    return {
+      days: days, left: left,
+      date: parseISO(c.ends).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' }),
+      full: parseISO(c.ends).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      pace: days > 0 && left > 0 ? Math.ceil(left * 7 / days) : 0
+    };
+  }
+  function clockLine(k) {
+    if (!k) return '';
+    return k.days > 0 ? T.daysLeftN(k.days) + ' · ' + k.date : k.days === 0 ? T.courseLastDay : T.courseEnded(k.date);
+  }
+
   /* The course as a one-line route: each section a waypoint, lit as far as the
      recorded coverage reaches, the aircraft where it stands today. */
   function courseRouteMini(p) {
@@ -2482,12 +2506,13 @@
   function syllabusProgressPanel() {
     var p = syllabusProgress();
     if (!p) return '';
-    var pct = p.total ? Math.round(p.done / p.total * 100) : 0;
+    var pct = p.total ? Math.round(p.done / p.total * 100) : 0, k = courseClock(p);
     return '<section class="panel"><div class="panel__head">' + icon('list3') +
       '<span class="panel__t">' + esc(T.sylProgress) + '</span>' +
       '<span class="panel__a mono">' + pct + '%</span></div>' +
       '<div class="panel__body">' +
         '<p class="field__hint">' + esc(T.sylDone(p.done, p.total)) + '</p>' +
+        (k ? '<p class="field__hint course-clock__line">' + icon('calendar') + '<span>' + esc(T.courseEndsOn(k.date) + ' · ' + clockLine(k)) + '</span></p>' : '') +
         '<a class="course-strip__route" href="#/progress" aria-label="' + esc(T.courseProgress) + '">' + courseRouteMini(p) + '</a>' +
         (p.done
           ? '<div class="bars">' + p.sections.map(function (s, i) {
@@ -3308,7 +3333,7 @@
     // the sign-in, course and PIN screens share one scope and mark, drawn once
     $$('.lock').forEach(function (el, i) { el.insertAdjacentHTML('afterbegin', Visuals.scope('lock' + i)); });
     if (global.Motion) Motion.init();
-    $$('.lock__mark').forEach(function (el) { el.innerHTML = Visuals.mark('mark mark--lock'); });
+    $$('.lock__mark').forEach(function (el) { el.innerHTML = BADGE; });
     var storageNotified = false;
     global.addEventListener('sortie:storage-error', function () {
       if (!storageNotified && !appEl.hidden) { storageNotified = true; toast(T.saveFailedBody, 'alert'); }
